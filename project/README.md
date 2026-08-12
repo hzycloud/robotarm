@@ -1,0 +1,32 @@
+# Edge-Sort
+
+Edge-Sort: 基于 LeRobot 的端侧闭环桌面分拣系统（TinyACT 轻量模仿学习 + 抓取验证闭环 + 能耗/时延基准）。
+
+## 硬件清单
+
+- SO-ARM101 主从双臂（leader 示教臂 + follower 执行臂），6× STS3215 总线舵机
+- 双相机：腕部 30W 手眼相机 + 外部 200W 全局相机
+- Raspberry Pi 5 8GB（端侧推理/决策）
+- A100（策略训练）
+
+## 软件与版本
+
+- LeRobot 版本：待安装后回填（计划 v0.4.4）
+- Python 3.10（miniforge conda 环境 `lerobot`）
+
+## HF_USER 说明
+
+所有采集/训练命令需先设置环境变量：
+
+```bash
+export HF_USER=<你的HuggingFace用户名>
+```
+
+数据集 repo_id 统一为 `${HF_USER}/so101_sort`。
+
+## 安全规则
+
+- 机械臂运行时清空 1 米内人员与贵重物品
+- 上电后不得触摸关节
+- 插拔线缆前断电
+- 异常运行立即断电
