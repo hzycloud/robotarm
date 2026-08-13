@@ -1,22 +1,16 @@
-# SO-Sort 数据集
+# SO-Sort 数据集说明
 
-## 概述
+SO-Sort 是 Edge-Sort 项目采集的桌面分拣模仿学习数据集，采用 LeRobot 标准格式（Parquet 与视频），可发布到 Hugging Face Hub，并可直接用 lerobot-train 训练。
 
-SO-Sort 是 Edge-Sort 项目采集的桌面分拣模仿学习数据集，格式为 LeRobot 标准
-（Parquet + 视频），可发布到 Hugging Face Hub 并直接用 `lerobot-train` 训练。
+## 1 任务描述
 
-## 任务描述
+桌面摆放三到四类小物体，位置与朝向随机，机械臂逐件抓取并按类别放入对应格口。
 
-桌面 3–4 类小物体随机位姿摆放，机械臂逐件抓取并按类别放入对应格口。
+## 2 采集协议
 
-## 采集协议
+演示条数 80 到 100。相机为 front（外部 200W）与 wrist（腕部 30W），分辨率 640×480，帧率 30，以 cameras.json 为准。采样内容包括关节角度、夹爪开合与双相机图像，频率约 30 到 50 Hz。物体清单见 task_definition.md。
 
-- 演示条数：80–100
-- 相机：front（外部 200W）+ wrist（腕部 30W），640x480@30（以 cameras.json 为准）
-- 采样：关节角度 + 夹爪开合 + 双相机，约 30–50 Hz
-- 物体清单：见 task_definition.md（以实际可抓取性为准）
-
-## 数据格式
+## 3 数据格式
 
 ```text
 ~/.cache/huggingface/lerobot/${HF_USER}/so101_sort/
@@ -26,20 +20,19 @@ SO-Sort 是 Edge-Sort 项目采集的桌面分拣模仿学习数据集，格式�
 └── info.json
 ```
 
-## 复现命令
+## 4 复现命令
 
 ```bash
 export HF_USER=<你的HuggingFace用户名>
-# 训练教师
 bash project/scripts/train_act.sh
-# 蒸馏数据集（教师生成动作标签）
 python project/scripts/offline_distill.py \
   --teacher outputs/train/act_so101_sort/checkpoints/last/pretrained_model \
   --src "${HF_USER}/so101_sort" --dst "${HF_USER}/so101_sort_distill"
-# 训练学生
-bash project/scripts/train_tinyact.sh   # 改 repo_id 为 so101_sort_distill
+bash project/scripts/train_tinyact.sh
 ```
 
-## 许可
+训练学生前，把 train_tinyact.sh 中的 repo_id 改为 `${HF_USER}/so101_sort_distill`。
 
-Apache-2.0（与 LeRobot 上游一致）；发布时附 LICENSE。
+## 5 许可
+
+Apache-2.0，与 LeRobot 上游一致，发布时附 LICENSE 文件。

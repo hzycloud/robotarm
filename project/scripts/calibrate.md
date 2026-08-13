@@ -1,15 +1,19 @@
-# 舵机设置与主从臂校准记录模板
+# 舵机设置与主从臂校准记录
 
-## 环境信息
+## 1 环境信息
 
-- 日期：
-- Pi 5 IP：
-- follower 端口：/dev/ttyACM0（以 lerobot-find-port 实测为准）
-- leader 端口：/dev/ttyACM1
-- follower id：my_awesome_follower_arm
-- leader id：my_awesome_leader_arm
+| 项目 | 值 |
+|---|---|
+| 日期 | |
+| Pi 5 IP | |
+| follower 端口 | /dev/ttyACM0，以 lerobot-find-port 实测为准 |
+| leader 端口 | /dev/ttyACM1 |
+| follower id | my_awesome_follower_arm |
+| leader id | my_awesome_leader_arm |
 
-## 舵机设置（lerobot-setup-motors）
+## 2 舵机设置
+
+使用 lerobot-setup-motors 为每个舵机设置 ID 与波特率，从 6 号夹爪舵机开始，依次到 1 号。
 
 | 关节 | 舵机 ID | 校准状态 | 备注 |
 |---|---|---|---|
@@ -20,14 +24,10 @@
 | 5 wrist_roll | 5 | | 终端收不到 5 号信号属正常 |
 | 6 gripper | 6 | | |
 
-## 校准记录（lerobot-calibrate）
+## 3 校准记录
 
-- follower 校准完成时间：
-- leader 校准完成时间：
-- 校准文件路径：~/.cache/huggingface/lerobot/<id>/
-- 异常现象：
+使用 lerobot-calibrate 分别校准 follower 与 leader，校准文件位于 ~/.cache/huggingface/lerobot/ 下对应 id 的目录。记录校准完成时间与异常现象。
 
-## 验收
+## 4 验收
 
-- [ ] follower 与 leader 在相同物理位姿时读数一致
-- [ ] 遥操作无抖动、无卡顿
+follower 与 leader 在相同物理位姿时读数一致，遥操作无抖动、无卡顿。
