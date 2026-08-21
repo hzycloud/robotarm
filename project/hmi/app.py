@@ -5,6 +5,7 @@
 #   2. 路由：首页、/api/stats 统计、/api/state 状态、/video/front|wrist 视频流、/urdf 静态资源。
 #   3. 所有外设读取均延迟到请求时进行，设备缺失时降级返回，不影响其他接口。
 import json
+import sys
 import time
 from pathlib import Path
 from typing import Optional
@@ -12,6 +13,11 @@ from typing import Optional
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+
+# 让 project 包可从任意 cwd 导入（app.py 位于 project/hmi/ 下，仓库根为 parents[2]）
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from project.hmi.cameras import mjpeg_frames, open_camera
 from project.hmi.robot_state import read_robot_state
