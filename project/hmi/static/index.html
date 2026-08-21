@@ -4,9 +4,84 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Edge-Sort 上位机</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "/static/vendor/three.module.js",
+      "three/examples/jsm/controls/OrbitControls.js": "/static/vendor/OrbitControls.js",
+      "three/examples/jsm/loaders/STLLoader.js": "/static/vendor/STLLoader.js",
+      "three/examples/jsm/loaders/ColladaLoader.js": "/static/vendor/ColladaLoader.js"
+    }
+  }
+  </script>
 </head>
 <body>
-  <h1>Edge-Sort 上位机</h1>
-  <p>页面构建中，将在后续任务中补充统计、视频与 3D 视图。</p>
+  <header class="topbar">
+    <h1>Edge-Sort 上位机</h1>
+    <span id="status-badge" class="badge badge-offline">离线</span>
+  </header>
+
+  <main>
+    <section class="stats-grid">
+      <div class="card">
+        <div class="card-label">抓取次数</div>
+        <div class="card-value" id="stat-total">0</div>
+      </div>
+      <div class="card">
+        <div class="card-label">抓取成功率</div>
+        <div class="card-value" id="stat-rate">--</div>
+      </div>
+      <div class="card">
+        <div class="card-label">平均周期（秒）</div>
+        <div class="card-value" id="stat-avg">--</div>
+      </div>
+      <div class="card">
+        <div class="card-label">最近一次用时（秒）</div>
+        <div class="card-value" id="stat-last">--</div>
+      </div>
+    </section>
+
+    <section class="video-row">
+      <figure class="video-panel">
+        <figcaption>外部相机 front</figcaption>
+        <img id="video-front" src="/video/front" alt="外部相机画面">
+      </figure>
+      <figure class="video-panel">
+        <figcaption>腕部相机 wrist</figcaption>
+        <img id="video-wrist" src="/video/wrist" alt="腕部相机画面">
+      </figure>
+    </section>
+
+    <section class="viewer-row">
+      <div class="viewer-panel">
+        <div class="card-label">机械臂 3D 姿态</div>
+        <div id="viewer3d"></div>
+      </div>
+    </section>
+
+    <section class="records">
+      <h2>最近抓取记录</h2>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>物体</th>
+              <th>结果</th>
+              <th>用时（秒）</th>
+              <th>重试次数</th>
+            </tr>
+          </thead>
+          <tbody id="records-body">
+            <tr><td colspan="5" class="text-muted">暂无数据</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/static/js/viewer3d.js"></script>
+  <script type="module" src="/static/js/app.js"></script>
 </body>
 </html>
