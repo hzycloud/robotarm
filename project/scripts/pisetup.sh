@@ -19,6 +19,10 @@
 #   docs.hiwonder.com/projects/LeRobot
 # ============================================================================
 
+# 非交互式 shell 不会加载 ~/.bashrc，conda 的 activate 函数不可用，
+# 需要显式导入 conda 的 profile 脚本后才能执行 conda activate。
+source "$HOME/miniforge3/etc/profile.d/conda.sh"
+
 # 任一命令失败立即退出，避免在损坏的环境中继续安装
 set -e
 
@@ -30,6 +34,10 @@ if [ ! -d "$HOME/lerobot" ]; then
   git clone https://github.com/huggingface/lerobot.git "$HOME/lerobot"
 fi
 cd "$HOME/lerobot"
+
+# 先拉取远程 tags：本地克隆可能缺少 v0.4.4 等 tag（例如克隆早于 tag 创建），
+# 直接 git checkout 会报 pathspec 不匹配错误。
+git fetch --tags
 
 # 3. 切换到与 HiWonder SO-ARM101 官方文档配套的固定版本 v0.4.4
 git checkout v0.4.4
