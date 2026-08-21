@@ -34,3 +34,13 @@ export HF_USER=<你的HuggingFace用户名>
 ## 6 文档写作规范
 
 Markdown 文档采用论文版式：标题后使用编号章节，段落以平实文本为主，减少加粗、表情符号、勾选框与嵌套列表等装饰性符号；表格仅在需要对照数据时使用。
+
+## 7 Pi 5 环境记录（附录）
+
+- 系统：Raspberry Pi OS 64-bit（aarch64），2026-08 安装并启用 SSH。
+- 包管理器：Miniforge（aarch64 版），conda 环境 lerobot（Python 3.10）。
+- LeRobot：v0.4.4（2026-08-21 安装，pip show lerobot 确认；源码位于 ~/lerobot）。
+- 安装方式：~/pisetup.sh（克隆 huggingface/lerobot 并固定 v0.4.4，可重复执行；非交互 shell 下会自动导入 conda profile）。
+- SSH：用户 pi，地址以 <Pi的IP> 占位。实际地址只记录在本地台账，不写入仓库（仓库将开源）。
+- 相机与端口：待机械臂接入后，用 lerobot-find-port 与 lerobot-find-cameras opencv 实测，写入 project/configs/cameras.json。
+- 维护：安装确认后可用 conda clean --all 与 pip cache purge 清理缓存，不影响已装环境。
