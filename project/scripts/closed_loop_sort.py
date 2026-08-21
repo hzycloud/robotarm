@@ -6,7 +6,9 @@
   1. 加载 int8 ONNX 策略（front/wrist/state → action_chunk）与验证器（wrist 图 → 抓到与否）；
   2. 用 LeRobot make_robot 连接 so101_follower；
   3. 每轮试次：读观测 → 策略推理 → 逐动作执行 → 腕部验证 → 失败重试（最多 N 次）；
-  4. 结果写入 CSV：trial/retries/grabbed/cycle_s。
+  4. 结果写入 CSV：trial/retries/grabbed/cycle_s；
+  5. 实时上报上位机：每轮把关节状态写入 datasets/robot_state.json（3D 视图），
+     每件结果追加到 datasets/grasp_log.json（统计页）。
 
 运行方式（Pi 5，lerobot 环境内）：
   python closed_loop_sort.py \
@@ -21,11 +23,21 @@
 
 import argparse  # 解析命令行参数
 import csv  # 写实验结果
+import sys  # 路径引导，保证 project 包可导入
 import time  # 计时
+from datetime import datetime
+from pathlib import Path  # 解析项目目录
 
 import numpy as np  # 图像与张量处理
 import onnxruntime as ort  # CPU 推理
 from lerobot.robots.factory import make_robot  # 连接 SO-ARM101
+
+# 让 project 包可从任意 cwd 导入（脚本位于 project/scripts/ 下）
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT))
+
+from project.hmi.grasp_logger import append_grasp_record  # 追加抓取记录到上位机日志
+from project.hmi.robot_state import write_robot_state  # 周期写关节状态供上位机 3D 视图
 
 
 def verify_grasp(verifier, wrist_img):
@@ -52,7 +64,10 @@ def main():
     ap.add_argument("--trials", type=int, default=30, help="number of sorting trials")
     ap.add_argument("--max_retries", type=int, default=2, help="max regrasp attempts per trial")
     ap.add_argument("--out", default="closed_loop_results.csv")
+    ap.add_argument("--object", default="unknown", help="object category for hmi log")
+    ap.add_argument("--data-dir", default=str(Path(__file__).resolve().parents[1] / "datasets"))
     args = ap.parse_args()
+    data_dir = Path(args.data_dir)
 
     # 1. 加载两个 int8 ONNX 模型（CPU 推理）
     policy = ort.InferenceSession(args.policy, providers=["CPUExecutionProvider"])
@@ -64,6 +79,15 @@ def main():
     rows = []  # 结果行集合
     for t in range(args.trials):
         obs = robot.read_observation()  # 读取双相机与关节状态
+        # 实时上报关节状态：供上位机 3D 视图跟随真实姿态
+        state_vec = obs["observation.state"]
+        gripper_ratio = float(state_vec[5]) if len(state_vec) >= 6 else 0.0
+        write_robot_state(
+            data_dir / "robot_state.json",
+            ts=datetime.now().astimezone().isoformat(),
+            joints=list(state_vec),
+            gripper=gripper_ratio,
+        )
         t0 = time.perf_counter()  # 单件周期计时起点
 
         # 3a. 策略推理：输出动作块，逐动作下发执行
@@ -107,6 +131,17 @@ def main():
             }
         )
         print(f"trial {t}: grabbed={grabbed} retries={retries}")
+        # 追加抓取记录：上位机统计页读取 grasp_log.json
+        append_grasp_record(
+            data_dir / "grasp_log.json",
+            {
+                "ts": datetime.now().astimezone().isoformat(),
+                "object": args.object,
+                "success": bool(grabbed),
+                "duration_s": round(time.perf_counter() - t0, 3),
+                "retries": retries,
+            },
+        )
 
     # 5. 写 CSV（实验矩阵后续统一汇总）
     with open(args.out, "w", newline="") as f:

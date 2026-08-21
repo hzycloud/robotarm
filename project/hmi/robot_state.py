@@ -43,3 +43,21 @@ def read_robot_state(path: Path, now: float) -> dict:
     gripper = float(data.get("gripper", 0.0))
     connected = bool(data.get("connected", False)) and (now - ts_epoch) <= 5.0
     return {"connected": connected, "joints": joints, "gripper": gripper, "ts": data.get("ts", "")}
+
+
+def write_robot_state(path: Path, ts: str, joints: list, gripper: float) -> None:
+    """把当前关节状态写入 robot_state.json，供上位机 3D 视图读取。
+
+    输入：状态文件路径、ISO8601 时间戳、关节角度列表（前 6 个）、夹爪开合比例。
+    输出：无；自动创建父目录并覆写文件，connected 恒为 True。
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = {
+        "ts": ts,
+        "connected": True,
+        "joints": [float(x) for x in joints[:6]],
+        "gripper": float(gripper),
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False)
