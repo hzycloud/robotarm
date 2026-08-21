@@ -1,0 +1,4 @@
+# 上位机（HMI）运行依赖：在 Pi 5 的 lerobot 环境中安装
+fastapi
+uvicorn
+opencv-python
